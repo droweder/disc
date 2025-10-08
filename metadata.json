@@ -1,0 +1,5 @@
+{
+  "name": "DISC Fácil",
+  "description": "Um aplicativo simples para aplicar o teste de perfil comportamental DISC. O usuário insere o nome, responde a uma série de perguntas de múltipla escolha e recebe uma análise do seu perfil dominante (Dominância, Influência, Estabilidade ou Conformidade).",
+  "requestFramePermissions": []
+}
