@@ -1,4 +1,4 @@
-import { PROFILE_DETAILS } from './constants';
+import { PROFILE_DETAILS, QUESTION_BLOCKS } from './constants';
 import { Answers, ProfileType, Question, Score } from './types';
 
 const getTraitsForScore = (
@@ -22,6 +22,27 @@ const getAnswerText = (value: number) => {
   }
 };
 
+const generateScoreChart = (scores: Score[]): string => {
+  let chart = '--- PONTUAÇÃO ---\n';
+  const maxBarLength = 20; // Max length for the bar chart
+
+  // We need to find the max score to scale the chart correctly
+  const maxScore = Math.max(...scores.map(s => s.value), 0);
+
+  const allProfiles: ProfileType[] = [ProfileType.D, ProfileType.I, ProfileType.S, ProfileType.C];
+
+  allProfiles.forEach(profile => {
+    const score = scores.find(s => s.profile === profile);
+    if (score) {
+      const barLength = maxScore > 0 ? Math.round((score.value / maxScore) * maxBarLength) : 0;
+      const bar = '■'.repeat(barLength);
+      chart += `${profile}: [${bar.padEnd(maxBarLength)}] ${score.value}\n`;
+    }
+  });
+
+  return chart;
+};
+
 export const generateReportText = (
   participantName: string,
   scores: Score[],
@@ -42,6 +63,7 @@ export const generateReportText = (
   const lowScoreTraits = lowProfiles.flatMap(p => getTraitsForScore(p.profile, 1, questions, answers));
 
   let report = `Resultado de ${participantName}\n\n`;
+  report += generateScoreChart(scores) + '\n';
   report += `Seu perfil predominante é ${dominantDetails.alternativeName} (${dominantProfile.profile.toUpperCase()}), com traços secundários do tipo ${secondaryDetails.alternativeName} (${secondaryProfile.profile.toUpperCase()}).\n\n`;
 
   const analysisParts: Record<ProfileType, () => string> = {
@@ -122,11 +144,14 @@ Pontos de atenção: Pode ter dificuldade em lidar com mudanças, evitar conflit
   report += analysisParts[dominantProfile.profile]();
 
   report += '\n\n--- MINHAS RESPOSTAS ---\n';
-  questions.forEach(q => {
-    const answerValue = answers[q.id];
-    if (answerValue) {
-      report += `- ${q.characteristics}: ${getAnswerText(answerValue)}\n`;
-    }
+  QUESTION_BLOCKS.forEach((block, index) => {
+    report += `\n*Bloco ${index + 1}*\n`;
+    block.questions.forEach(q => {
+      const answerValue = answers[q.id];
+      if (answerValue) {
+        report += `- ${q.characteristics}: ${getAnswerText(answerValue)}\n`;
+      }
+    });
   });
 
   return report.trim();
