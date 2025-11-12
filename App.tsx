@@ -12,12 +12,14 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(AppScreen.WELCOME);
   const [participantName, setParticipantName] = useState<string>('');
   const [answers, setAnswers] = useState<Answers>({});
+  const [activeTest, setActiveTest] = useState<HistoryItem | null>(null);
 
   const allQuestions = useMemo(() => QUESTION_BLOCKS.flatMap(block => block.questions), []);
 
   const resetState = useCallback(() => {
     setParticipantName('');
     setAnswers({});
+    setActiveTest(null);
     setCurrentScreen(AppScreen.WELCOME);
   }, []);
 
@@ -45,13 +47,31 @@ const App: React.FC = () => {
       console.error("Failed to save test history:", error);
     }
     
+    setAnswers(finalAnswers);
+    setActiveTest(newHistoryItem);
     setCurrentScreen(AppScreen.RESULTS);
   };
+
+  const updateHistoryItem = useCallback((id: string, analysis: string) => {
+    try {
+        const existingHistory = localStorage.getItem('discTestHistory');
+        const history: HistoryItem[] = existingHistory ? JSON.parse(existingHistory) : [];
+        const itemIndex = history.findIndex(item => item.id === id);
+
+        if (itemIndex !== -1) {
+            history[itemIndex].analysis = analysis;
+            localStorage.setItem('discTestHistory', JSON.stringify(history));
+        }
+    } catch (error) {
+        console.error("Failed to update history item:", error);
+    }
+  }, []);
 
 
   const handleRerunTest = (item: HistoryItem) => {
     setParticipantName(item.participantName);
     setAnswers(item.answers);
+    setActiveTest(item);
     setCurrentScreen(AppScreen.RESULTS);
   };
 
@@ -64,22 +84,23 @@ const App: React.FC = () => {
       case AppScreen.QUESTIONNAIRE:
         return (
           <QuestionnaireScreen
-            answers={answers}
+            answers={{}}
             setAnswers={setAnswers}
             onFinish={handleFinish}
           />
         );
       case AppScreen.RESULTS:
+        if (!activeTest) return null;
         return (
           <ResultsScreen
-            participantName={participantName}
-            answers={answers}
+            testResult={activeTest}
             questions={allQuestions}
             onRestart={resetState}
+            onAnalysisGenerated={updateHistoryItem}
           />
         );
       case AppScreen.HISTORY:
-        return <HistoryScreen questions={allQuestions} onBack={resetState} onRerunTest={handleRerunTest} />;
+        return <HistoryScreen questions={allQuestions} onBack={resetState} onRerunTest={handleRerunTest} onUpdateHistory={updateHistoryItem} />;
       default:
         return <WelcomeScreen onStart={handleStart} onShowHistory={() => setCurrentScreen(AppScreen.HISTORY)} />;
     }

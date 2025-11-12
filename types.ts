@@ -37,4 +37,5 @@ export interface HistoryItem {
   participantName: string;
   answers: Answers;
   date: string;
+  analysis?: string; // Armazena a análise gerada pela IA
 }
