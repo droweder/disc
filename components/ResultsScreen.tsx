@@ -3,7 +3,6 @@ import { Answers, ProfileType, Question, Score } from '../types';
 import { PROFILE_DETAILS } from '../constants';
 import { HomeIcon, PrintIcon, ShareIcon } from './icons';
 import AnalysisReport from './AnalysisReport';
-import { generateReportText } from '../generateReportText';
 
 interface ResultsScreenProps {
   participantName: string;
@@ -37,16 +36,14 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ participantName, answers,
 
   const handleShare = () => {
     if (!dominantProfileDetails) return;
-
-    const reportText = generateReportText(participantName, scores, questions, answers);
-
+    const text = `Meu perfil DISC é ${dominantProfileDetails.name}! Descubra o seu também.`;
     if (navigator.share) {
       navigator.share({
-        title: `Resultado DISC de ${participantName}`,
-        text: reportText,
+        title: 'Resultado Teste DISC',
+        text: text,
       }).catch(console.error);
     } else {
-      navigator.clipboard.writeText(reportText).then(() => {
+      navigator.clipboard.writeText(text).then(() => {
          alert('Resultado copiado para a área de transferência!');
       }, () => {
          alert('A função de compartilhar não é suportada neste navegador.');
