@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Answers, Question, QuestionBlock } from '../types';
+import { Answers, QuestionBlock } from '../types';
 import { QUESTION_BLOCKS, ANSWER_OPTIONS, TOTAL_QUESTIONS } from '../constants';
 import ProgressBar from './ProgressBar';
 

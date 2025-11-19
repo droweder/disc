@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { AppScreen, Answers, ProfileType, HistoryItem } from './types';
+import { AppScreen, Answers, HistoryItem } from './types';
 import WelcomeScreen from './components/WelcomeScreen';
 import InstructionsScreen from './components/InstructionsScreen';
 import QuestionnaireScreen from './components/QuestionnaireScreen';
